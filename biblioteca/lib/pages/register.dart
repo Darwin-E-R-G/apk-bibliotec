@@ -1,9 +1,8 @@
 import 'dart:convert';
 
+import 'package:biblioteca/pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-import '../login/logi2.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -71,6 +70,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       } else {
         // Error en el registro
+        // ignore: avoid_print
+        print(response.statusCode);
         // ignore: avoid_print
         print('Error en el registro');
       }

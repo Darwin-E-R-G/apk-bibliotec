@@ -1,9 +1,12 @@
 // ignore_for_file: avoid_print
 import 'dart:convert';
+//import 'package:biblioteca/pages/categoria.dart';
+import 'package:biblioteca/pages/incio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-import '../pages/register.dart';
+import 'register.dart';
+// ignore: unused_import
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,10 +48,17 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         // Inicio de sesión exitoso
         print('Inicio de sesión exitoso');
+        String responseBody = response.body;
+        Map<String, dynamic> jsonResponse = json.decode(responseBody);
+        String jwtToken = jsonResponse['jwt'];
+
         // ignore: use_build_context_synchronously
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          MaterialPageRoute(
+              builder: (context) => inicioScreen(
+                    token: jwtToken,
+                  )),
         );
       } else {
         // Error en el inicio de sesión
@@ -253,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: const InputDecoration(labelText: 'Contraseña'),
         validator: (value) {
           // ignore: dead_code
-          if (value!.length <= 8) {
+          if (value!.length <= 6) {
             return 'La contraseña debe tener mas de 8 caracteres';
             // ignore: dead_code
             if (value.isEmpty) {
