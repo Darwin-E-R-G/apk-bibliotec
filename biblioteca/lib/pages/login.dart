@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
       String username = _usernameController.text;
       String password = _passwordController.text;
       // URL de tu servidor Strapi para el inicio de sesión
-      String url = 'http://localhost:1337/api/auth/local';
+      String url = 'http://192.168.101.72:1337/api/auth/local';
       // Datos a enviar
       Map<String, dynamic> data = {
         'identifier': username,
@@ -75,9 +75,8 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: const Color.fromRGBO(65, 150, 125, 1),
         title: const Text(
           "BIBLIOTECA",
-          style: TextStyle(color: Colors.white, fontSize: 40),
+          style: TextStyle(color: Colors.white),
         ),
-        toolbarHeight: 80,
       ),
       // ignore: avoid_unnecessary_containers
       body: Stack(children: [
@@ -87,11 +86,11 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 Image.asset('assets/images/logoiser.png',
-                    width: 180, height: 180),
+                    width: 150, height: 150),
                 // ignore: avoid_unnecessary_containers
                 Container(
                   width: 300,
-                  height: 400,
+                  height: 350,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20.0),
                     color: const Color.fromARGB(255, 216, 216, 216),
@@ -108,11 +107,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   'Iniciar Sesión',
                                   style: TextStyle(
-                                      fontSize: 30,
+                                      fontSize: 20,
                                       fontWeight: FontWeight.bold),
                                 )),
                             const SizedBox(
-                              height: 30,
+                              height: 20,
                             ),
                             username(),
                             const SizedBox(
@@ -128,18 +127,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const Spacer()
                               ],
                             ),
+                            Row(
+                              children: [
+                                registro(context),
+                                const Spacer(), // Esto empujará el texto hacia el lado derecho
+                              ],
+                            ),
                             const SizedBox(
                               height: 30,
                             ),
                             botonAcceder(),
                             const SizedBox(
                               height: 15,
-                            ),
-                            Row(
-                              children: [
-                                registro(context),
-                                const Spacer(), // Esto empujará el texto hacia el lado derecho
-                              ],
                             ),
                           ],
                         ),
@@ -207,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _login();
       },
       child: Container(
-        width: 250,
+        width: 200,
         alignment: Alignment.center,
         padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
@@ -217,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: const Text(
           'Acceder',
           style: TextStyle(
-            fontSize: 25,
+            //fontSize: 25,
             color: Colors.white, // Color del texto
             fontWeight: FontWeight.bold, // Texto en negrita
             fontFamily: AutofillHints.addressCity,
@@ -235,16 +234,19 @@ class _LoginScreenState extends State<LoginScreen> {
         color: Colors.white,
       ),
       margin: const EdgeInsets.symmetric(horizontal: 1.0),
-      child: TextFormField(
-        style: const TextStyle(fontSize: 10),
-        controller: _usernameController,
-        decoration: const InputDecoration(labelText: 'Correo institucional'),
-        validator: (value) {
-          if (value!.isEmpty) {
-            return 'Este campo es obligatorio';
-          }
-          return null;
-        },
+      child: Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: TextFormField(
+          //style: const TextStyle(fontSize: 10),
+          controller: _usernameController,
+          decoration: const InputDecoration(labelText: 'Correo institucional'),
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'Este campo es obligatorio';
+            }
+            return null;
+          },
+        ),
       ),
     );
   }
@@ -252,27 +254,30 @@ class _LoginScreenState extends State<LoginScreen> {
   Container passwor() {
     // ignore: avoid_unnecessary_containers
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        color: Colors.white,
-      ),
-      margin: const EdgeInsets.symmetric(horizontal: 1.0),
-      child: TextFormField(
-        style: const TextStyle(fontSize: 10),
-        controller: _passwordController,
-        decoration: const InputDecoration(labelText: 'Contraseña'),
-        validator: (value) {
-          // ignore: dead_code
-          if (value!.length <= 6) {
-            return 'La contraseña debe tener mas de 8 caracteres';
-            // ignore: dead_code
-            if (value.isEmpty) {
-              return 'Este campo es obligatorio';
-            }
-          }
-          return null;
-        },
-      ),
-    );
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          color: Colors.white,
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 1.0),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: TextFormField(
+            //style: const TextStyle(fontSize: 10),
+            obscureText: true,
+            controller: _passwordController,
+            decoration: const InputDecoration(labelText: 'Contraseña'),
+            validator: (value) {
+              // ignore: dead_code
+              if (value!.length <= 6) {
+                return 'La contraseña debe tener màs de 6 caracteres';
+                // ignore: dead_code
+                if (value.isEmpty) {
+                  return 'Este campo es obligatorio';
+                }
+              }
+              return null;
+            },
+          ),
+        ));
   }
 }

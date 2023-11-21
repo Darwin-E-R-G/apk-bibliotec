@@ -1,8 +1,9 @@
 import 'dart:convert';
 
-import 'package:biblioteca/pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import 'login.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -22,11 +23,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _documentIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void _register() async {
-    // ignore: avoid_print
+  int currentStep = 1;
 
+  void _register() async {
     if (_formKey.currentState!.validate()) {
-      // Datos del formulario
+      // Realizar acciones de registro aquí
       String username = _usernameController.text;
       String email = _emailController.text;
       String firstname = _firstnameController.text;
@@ -35,10 +36,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       String documentId = _documentIdController.text;
       String password = _passwordController.text;
 
-      // URL de tu servidor Strapi
-      String url = 'http://localhost:1337/api/auth/local/register';
+      String url = '192.168.101.72:1337/api/auth/local/register';
 
-      // Datos a enviar
       Map<String, dynamic> data = {
         "username": username,
         "email": email,
@@ -50,8 +49,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         "password": password
       };
 
-      // Realizar la petición POST
-      // ignore: unused_local_variable
       final response = await http.post(
         Uri.parse(url),
         headers: <String, String>{
@@ -59,6 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
         body: jsonEncode(data),
       );
+
       if (response.statusCode == 200) {
         // Registro exitoso
         // ignore: avoid_print
@@ -89,7 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: const Color.fromRGBO(65, 150, 125, 1),
         title: const Text(
           "BIBLIOTECA",
-          style: TextStyle(color: Colors.white, fontSize: 40),
+          style: TextStyle(color: Colors.white),
         ),
         toolbarHeight: 80,
       ),
@@ -98,12 +96,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
-            // ignore: avoid_unnecessary_containers
             child: Column(
               children: [
                 Image.asset('assets/images/logoiser.png',
                     width: 150, height: 150),
-                // ignore: avoid_unnecessary_containers
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20.0),
@@ -115,36 +111,92 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Column(
                         children: [
                           const Padding(
-                              padding: EdgeInsets.only(top: 5.0),
-                              child: Text(
-                                'Registro',
-                                style: TextStyle(
-                                    fontSize: 30, fontWeight: FontWeight.bold),
-                              )),
-                          // ignore: avoid_unnecessary_containers
-
-                          platillaCampos(_firstnameController, 'Nombres'),
-                          sepracionentrecampos,
-                          platillaCampos(_lastnameController, 'Apellidos'),
-                          sepracionentrecampos,
-                          platillaCampos(
-                              _documentTypeController, 'tipo de documento'),
-                          sepracionentrecampos,
-                          platillaCampos(
-                              _documentIdController, 'Numero de documento '),
-                          sepracionentrecampos,
-                          platillaCampos(_usernameController, 'Nombre usuario'),
-                          sepracionentrecampos,
-                          platillaCampos(
-                              _emailController, 'Correo electrónico'),
-                          sepracionentrecampos,
-
-                          platillaCamposContrasena(
-                              _passwordController, 'Contraseña'),
-                          const SizedBox(
-                            height: 10,
+                            padding: EdgeInsets.only(top: 5.0),
+                            child: Text(
+                              'Registro',
+                              style: TextStyle(
+                                  fontSize: 30, fontWeight: FontWeight.bold),
+                            ),
                           ),
-                          botonRegister(),
+                          if (currentStep == 1) ...[
+                            platillaCampos(_firstnameController, 'Nombres*'),
+                            sepracionentrecampos,
+                            platillaCampos(_lastnameController, 'Apellidos*'),
+                            sepracionentrecampos,
+                            platillaCampos(_documentTypeController,
+                                'tipo de documento cc, ti o otro*'),
+                            sepracionentrecampos,
+                            platillaCampos(
+                                _documentIdController, 'Numero de documento* '),
+                            sepracionentrecampos,
+                          ],
+                          if (currentStep == 2) ...[
+                            platillaCampos(
+                                _usernameController, 'Nombre usuario*'),
+                            sepracionentrecampos,
+                            platillaCampos(
+                                _emailController, 'Correo electrónico*'),
+                            sepracionentrecampos,
+                            platillaCamposContrasena(
+                                _passwordController, 'Contraseña*'),
+                            sepracionentrecampos,
+                            botonRegister(),
+                            sepracionentrecampos,
+                          ],
+                          if (currentStep == 1) ...[
+                            InkWell(
+                              onTap: () {
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() {
+                                    currentStep += 1;
+                                  });
+                                }
+                              },
+                              child: Container(
+                                width: 200,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromRGBO(65, 150, 125, 1),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: const Text(
+                                  'Continuar',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                          if (currentStep == 2) ...[
+                            InkWell(
+                              onTap: () {
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() {
+                                    currentStep -= 1;
+                                  });
+                                }
+                              },
+                              child: Container(
+                                width: 200,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromRGBO(65, 150, 125, 1),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: const Text(
+                                  'Atras',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
                         ],
                       ),
                     ),
@@ -161,11 +213,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   InkWell botonRegister() {
     return InkWell(
       onTap: () {
-        // Coloca aquí la acción para navegar a otra vista (pantalla)
         _register();
       },
       child: Container(
-        width: 250,
+        width: 200,
         alignment: Alignment.center,
         padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
@@ -175,10 +226,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: const Text(
           'Registrarte',
           style: TextStyle(
-            fontSize: 25,
-            color: Colors.white, // Color del texto
-            fontWeight: FontWeight.bold, // Texto en negrita
-            fontFamily: AutofillHints.addressCity,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -186,7 +235,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Container platillaCampos(TextEditingController n, String p) {
-    // ignore: avoid_unnecessary_containers
     return Container(
       alignment: Alignment.bottomCenter,
       decoration: BoxDecoration(
@@ -194,45 +242,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
         color: Colors.white,
       ),
       margin: const EdgeInsets.symmetric(horizontal: 0.5),
-      child: TextFormField(
-        style: const TextStyle(fontSize: 10),
-        controller: n,
-        decoration: InputDecoration(
-            labelText: p,
-            labelStyle: const TextStyle(fontSize: 10, decorationThickness: 10)),
-        validator: (value) {
-          if (value!.isEmpty) {
-            return 'Este campo es obligatorio';
-          }
-          return null;
-        },
+      child: Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: TextFormField(
+          controller: n,
+          decoration: InputDecoration(
+              labelText: p,
+              labelStyle: const TextStyle(decorationThickness: 10)),
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'Este campo es obligatorio';
+            }
+            return null;
+          },
+        ),
       ),
     );
   }
 
   Container platillaCamposContrasena(TextEditingController n, String p) {
-    // ignore: avoid_unnecessary_containers
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15.0),
         color: Colors.white,
       ),
       margin: const EdgeInsets.symmetric(horizontal: 1.0),
-      child: TextFormField(
-        style: const TextStyle(fontSize: 10),
-        obscureText: true,
-        controller: n,
-        decoration: InputDecoration(
-            labelText: p,
-            labelStyle: const TextStyle(
-              fontSize: 10,
-            )),
-        validator: (value) {
-          if (value!.isEmpty) {
-            return 'Este campo es obligatorio';
-          }
-          return null;
-        },
+      child: Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: TextFormField(
+          obscureText: true,
+          controller: n,
+          decoration:
+              InputDecoration(labelText: p, labelStyle: const TextStyle()),
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'Este campo es obligatorio';
+            }
+            if (value.length <= 6) {
+              return 'La contraseña debe tener más de 6 caracteres';
+            }
+            return null;
+          },
+        ),
       ),
     );
   }

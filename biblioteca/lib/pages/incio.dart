@@ -1,4 +1,6 @@
 //import 'package:biblioteca/pages/categoria.dart';
+import 'package:biblioteca/pages/autor.dart';
+import 'package:biblioteca/pages/titulo.dart';
 import 'package:flutter/material.dart';
 
 import 'categoria.dart';
@@ -24,10 +26,16 @@ class _inicioScreen extends State<inicioScreen> {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(65, 150, 125, 1),
         title: const Text(
-          "BIBLIOTECA",
-          style: TextStyle(color: Colors.white, fontSize: 40),
+          "BIBLIOTECA ISER",
+          style: TextStyle(color: Colors.white),
         ),
-        toolbarHeight: 80,
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(0),
+          child: Text(
+            "Oscar Mogollón Jaimes",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
       ),
       // ignore: avoid_unnecessary_containers
       body: Padding(
@@ -52,7 +60,7 @@ class _inicioScreen extends State<inicioScreen> {
                     child: const Text(
                       'Buscar por',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 25,
                       ),
                     ),
                   ),
@@ -77,7 +85,7 @@ class _inicioScreen extends State<inicioScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  MyDataScreen(token: widget.token),
+                                  categoriaScreenScreen(token: widget.token),
                             ),
                           );
                         },
@@ -111,9 +119,12 @@ class _inicioScreen extends State<inicioScreen> {
                       ),
                       InkWell(
                         onTap: () {
-                          setState(() {
-                            opcionSeleccionada = 'autor';
-                          });
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    autorScreen(token: widget.token),
+                              ));
                         },
                         child: Container(
                           width: 250,
@@ -145,9 +156,12 @@ class _inicioScreen extends State<inicioScreen> {
                       ),
                       InkWell(
                         onTap: () {
-                          setState(() {
-                            opcionSeleccionada = 'titulo';
-                          });
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    tituloScreen(token: widget.token),
+                              ));
                         },
                         child: Container(
                           width: 250,

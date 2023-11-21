@@ -10,22 +10,20 @@ class Book {
   final String editorial;
   final int publishedYear;
   final String code;
-  // final String description;
+  //final String description;
   final int numberCopies;
   final String status;
-  final String subcategory;
-
-  Book(
-      {required this.id,
-      required this.title,
-      required this.author,
-      required this.editorial,
-      required this.publishedYear,
-      required this.code,
-      //required this.description,
-      required this.numberCopies,
-      required this.status,
-      this.subcategory = ''});
+  Book({
+    required this.id,
+    required this.title,
+    required this.author,
+    required this.editorial,
+    required this.publishedYear,
+    required this.code,
+    // required this.description,
+    required this.numberCopies,
+    required this.status,
+  });
 
   factory Book.fromJson(Map<String, dynamic> json) {
     return Book(
@@ -37,23 +35,22 @@ class Book {
         code: json['attributes']['code'],
         //description: json['attributes']['description'],
         numberCopies: json['attributes']['number_copies'],
-        status: json['attributes']['status'],
-        subcategory: json['attributes']['Subcategory'] ?? '');
+        status: json['attributes']['status']);
   }
 }
 
 // ignore: must_be_immutable, camel_case_types
-class categoriaScreenScreen extends StatefulWidget {
+class autorScreen extends StatefulWidget {
   final String token;
-  const categoriaScreenScreen({super.key, required this.token});
+  const autorScreen({super.key, required this.token});
 
   @override
   // ignore: library_private_types_in_public_api
-  _categoriaScreen createState() => _categoriaScreen();
+  _autorScreenState createState() => _autorScreenState();
 }
 
 // ignore: camel_case_types
-class _categoriaScreen extends State<categoriaScreenScreen> {
+class _autorScreenState extends State<autorScreen> {
   final String apiUrl = 'http://localhost:1337/api/books';
   TextEditingController searchController = TextEditingController();
   String titleToSearch = 'Libro de ejemplo 1'; // Cambia el título a buscar
@@ -61,8 +58,6 @@ class _categoriaScreen extends State<categoriaScreenScreen> {
   List<Book> books = [];
   List<Book> filteredBooks = [];
   bool showBooks = false;
-  String selectedOption = 'Opción 1';
-  String? selectedSubcategory;
 
   @override
   void initState() {
@@ -97,8 +92,7 @@ class _categoriaScreen extends State<categoriaScreenScreen> {
                 code: bookData['attributes']['code'],
                 //description: bookData['attributes']['description'],
                 numberCopies: bookData['attributes']['number_copies'],
-                status: bookData['attributes']['status'],
-                subcategory: bookData['attributes']['Subcategory '] ?? ''))
+                status: bookData['attributes']['status']))
             .toList();
         // ignore: avoid_print
         print('este es el token::P:::::::  2222');
@@ -125,28 +119,6 @@ class _categoriaScreen extends State<categoriaScreenScreen> {
     });
   }
 
-  void filterBySubcategory(String? subcategory) {
-    setState(() {
-      selectedSubcategory = subcategory;
-      filterBooksBySubcategory(); // Llamamos a la función de filtrado cuando cambia la subcategoría
-    });
-  }
-
-  void filterBooksBySubcategory() {
-    // Filtramos los libros por la subcategoría seleccionada
-    setState(() {
-      if (selectedSubcategory!.isNotEmpty) {
-        filteredBooks = books
-            .where((book) => book.subcategory == selectedSubcategory)
-            .toList();
-      } else {
-        // Si no hay subcategoría seleccionada, mostramos todos los libros
-        filteredBooks = List.from(books);
-      }
-      showBooks = true;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -155,7 +127,7 @@ class _categoriaScreen extends State<categoriaScreenScreen> {
         backgroundColor: const Color.fromRGBO(65, 150, 125, 1),
         title: const Text(
           "BIBLIOTECA ISER",
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(color: Colors.white),
         ),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(0),
@@ -188,12 +160,12 @@ class _categoriaScreen extends State<categoriaScreenScreen> {
                   child: const Row(
                     children: <Widget>[
                       IconButton(
-                        icon: Icon(Icons.category_outlined),
+                        icon: Icon(Icons.person_2_sharp),
                         onPressed: null,
                       ),
                       Expanded(
                         child: Text(
-                          'Categoria',
+                          'Autor',
                         ),
                       ),
                     ],
@@ -215,21 +187,15 @@ class _categoriaScreen extends State<categoriaScreenScreen> {
                   child: Row(
                     children: <Widget>[
                       Expanded(
-                        child: DropdownButton<String>(
-                          value: selectedSubcategory,
-                          onChanged: filterBySubcategory,
-                          items: <String>[
-                            'Subcategoría1',
-                            'Subcategoría2',
-                            'Subcategoría3',
-                            // ... (agrega más subcategorías según sea necesario)
-                          ].map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
+                        child: TextField(
+                          controller: searchController,
+                          decoration:
+                              const InputDecoration(labelText: 'Buscar'),
                         ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.search),
+                        onPressed: filterBooks,
                       ),
                     ],
                   ),
@@ -241,7 +207,7 @@ class _categoriaScreen extends State<categoriaScreenScreen> {
                   visible:
                       showBooks, // Si showBooks es true, se mostrará; de lo contrario, se ocultará
                   child: libros(filteredBooks: filteredBooks),
-                ),
+                )
               ],
             ),
           ),
