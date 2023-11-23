@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
       String username = _usernameController.text;
       String password = _passwordController.text;
       // URL de tu servidor Strapi para el inicio de sesión
-      String url = 'http://192.168.101.72:1337/api/auth/local';
+      String url = 'http://localhost:1337/api/auth/local';
       // Datos a enviar
       Map<String, dynamic> data = {
         'identifier': username,
@@ -49,15 +49,22 @@ class _LoginScreenState extends State<LoginScreen> {
         // Inicio de sesión exitoso
         print('Inicio de sesión exitoso');
         String responseBody = response.body;
+        print(responseBody);
         Map<String, dynamic> jsonResponse = json.decode(responseBody);
         String jwtToken = jsonResponse['jwt'];
-
+        int userId = jsonResponse['user']['id'];
+        // ignore: prefer_interpolation_to_compose_strings
+        print('este es el toker=rn ' + jwtToken);
+        // ignore: prefer_interpolation_to_compose_strings
+        print('este es el id ');
+        print(userId);
         // ignore: use_build_context_synchronously
         Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) => inicioScreen(
                     token: jwtToken,
+                    iduser: userId,
                   )),
         );
       } else {

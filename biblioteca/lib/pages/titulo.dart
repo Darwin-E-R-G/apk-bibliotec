@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
+
 class Book {
   final int id;
   final String title;
@@ -35,11 +37,16 @@ class Book {
         status: json['attributes']['status']);
   }
 
-  Future<void> reserveBook(String token) async {
+  Future<void> reserveBook(String token, int id, int iduser) async {
+    DateTime now = DateTime.now();
+
+    // Utilizar DateFormat para formatear la fecha sin la hora
+    String fechaActual = DateFormat('yyyy-MM-dd').format(now);
     if (status == "disponible") {
       status = "reservado";
 
       // Actualizar el estado en el servidor Strapi
+      print(id);
       final String apiUrl = 'http://localhost:1337/api/books/$id';
       final response = await http.put(
         Uri.parse(apiUrl),
@@ -48,12 +55,41 @@ class Book {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'attributes': {'status': 'reservado'},
+          "data": {"status": "reservado"}
         }),
       );
-
       if (response.statusCode != 200) {
         // Manejar el error al actualizar el estado en el servidor
+        print(
+            'Error en la solicitud PUT. Código de estado: ${response.statusCode}');
+        print('Cuerpo de la respuesta: ${response.body}');
+        throw Exception('Failed to reserve book');
+      }
+      print(iduser);
+      print(fechaActual);
+
+      final repons = await http.post(
+        Uri.parse('http://localhost:1337/api/bookings'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "data": {
+            "booking_date": fechaActual,
+            "start": fechaActual,
+            "status": "pendiente",
+            "book": id,
+            "users_permissions_user": iduser
+          }
+        }),
+      );
+      print(repons.statusCode);
+      if (repons.statusCode != 200) {
+        // Manejar el error al actualizar el estado en el servidor
+        print(
+            'Error en la solicitud PUT. Código de estado: ${repons.statusCode}');
+        print('Cuerpo de la respuesta: ${repons.body}');
         throw Exception('Failed to reserve book');
       }
     }
@@ -63,7 +99,9 @@ class Book {
 // ignore: camel_case_types
 class tituloScreen extends StatefulWidget {
   final String token;
-  const tituloScreen({Key? key, required this.token}) : super(key: key);
+  final int iduser;
+  const tituloScreen({Key? key, required this.token, required this.iduser})
+      : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -217,6 +255,7 @@ class _tituloScreenState extends State<tituloScreen> {
                   child: libros(
                     filteredBooks: filteredBooks,
                     token: widget.token,
+                    iduser: widget.iduser,
                     onReserve: () {
                       setState(() {
                         // Actualizar la interfaz de usuario
@@ -240,11 +279,13 @@ class libros extends StatelessWidget {
     required this.filteredBooks,
     required this.token,
     required this.onReserve,
+    required this.iduser,
   }) : super(key: key);
 
   final List<Book> filteredBooks;
   final String token;
   final VoidCallback onReserve;
+  final int iduser;
 
   @override
   Widget build(BuildContext context) {
@@ -266,27 +307,65 @@ class libros extends StatelessWidget {
               buttonColor = Colors.green;
               isButtonEnabled = true;
             }
-            return ListTile(
-              selectedTileColor: Colors.amber,
-              title: Text('Titulo:\n${book.title}'),
-              subtitle: Text('Autor:\n${book.author}'),
-              trailing: ElevatedButton(
-                onPressed: isButtonEnabled
-                    ? () async {
-                        try {
-                          await book.reserveBook(token);
-                          onReserve.call();
-                        } catch (e) {
-                          print('Error al reservar el libro: $e');
-                        }
-                      }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: buttonColor,
-                ),
-                child: Text(
-                  book.status,
-                  style: const TextStyle(color: Colors.black),
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8.0),
+              child: ListTile(
+                selectedTileColor: Colors.amber,
+                title: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: Colors.grey,
+                  ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Titulo: ${book.title}',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 14.0),
+                            ),
+                            Text(
+                              'Autor: ${book.author}',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 14.0),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8.0),
+                      ElevatedButton(
+                        onPressed: isButtonEnabled
+                            ? () async {
+                                try {
+                                  await book.reserveBook(
+                                      token, book.id, iduser);
+                                  onReserve.call();
+                                } catch (e) {
+                                  print('Error al reservar el libro: $e');
+                                }
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          // ignore: deprecated_member_use
+                          primary: buttonColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                        child: Text(
+                          book.status,
+                          style: const TextStyle(
+                              color: Colors.black, fontSize: 14.0),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

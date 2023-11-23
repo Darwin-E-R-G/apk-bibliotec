@@ -1,4 +1,4 @@
-// ignore_for_file: unused_local_variable
+// ignore_for_file: unused_local_variable, avoid_print
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -10,9 +10,8 @@ class Book {
   final String editorial;
   final int publishedYear;
   final String code;
-  //final String description;
   final int numberCopies;
-  final String status;
+  String status;
   Book({
     required this.id,
     required this.title,
@@ -20,7 +19,6 @@ class Book {
     required this.editorial,
     required this.publishedYear,
     required this.code,
-    // required this.description,
     required this.numberCopies,
     required this.status,
   });
@@ -33,16 +31,45 @@ class Book {
         editorial: json['attributes']['editorial'],
         publishedYear: json['attributes']['published_year'],
         code: json['attributes']['code'],
-        //description: json['attributes']['description'],
         numberCopies: json['attributes']['number_copies'],
         status: json['attributes']['status']);
   }
+
+  Future<void> reserveBook(String token, int id) async {
+    if (status == "disponible") {
+      status = "reservado";
+
+      // Actualizar el estado en el servidor Strapi
+      print(id);
+      final String apiUrl = 'http://localhost:1337/api/books/$id';
+      final response = await http.put(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'data': {
+            'attributes': {'status': 'reservado'},
+          },
+        }),
+      );
+      print(response.statusCode);
+      if (response.statusCode != 200) {
+        // Manejar el error al actualizar el estado en el servidor
+        print(
+            'Error en la solicitud PUT. Código de estado: ${response.statusCode}');
+        print('Cuerpo de la respuesta: ${response.body}');
+        throw Exception('Failed to reserve book');
+      }
+    }
+  }
 }
 
-// ignore: must_be_immutable, camel_case_types
+// ignore: camel_case_types
 class autorScreen extends StatefulWidget {
   final String token;
-  const autorScreen({super.key, required this.token});
+  const autorScreen({Key? key, required this.token}) : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -61,11 +88,10 @@ class _autorScreenState extends State<autorScreen> {
 
   @override
   void initState() {
-    // ignore: avoid_print, prefer_interpolation_to_compose_strings
+    // ignore: prefer_interpolation_to_compose_strings
     print('este es el token::P:::::::  ' + widget.token);
 
     super.initState();
-    // ignore: avoid_print
     print(apiUrl);
     http.get(
       Uri.parse(apiUrl),
@@ -74,13 +100,10 @@ class _autorScreenState extends State<autorScreen> {
       },
     ).then((response) {
       if (response.statusCode == 200) {
-        // ignore: avoid_print
         print('este es el token::P:::::::  1111');
         String responseBody = response.body;
-        // ignore: avoid_print
         print(responseBody);
         Map<String, dynamic> jsonResponse = json.decode(responseBody);
-        // ignore: avoid_print
         print('este es el token::P:::::::  2222');
         List<Book> retobook = (jsonDecode(responseBody)['data'] as List)
             .map((bookData) => Book(
@@ -90,21 +113,17 @@ class _autorScreenState extends State<autorScreen> {
                 editorial: bookData['attributes']['editorial'],
                 publishedYear: bookData['attributes']['published_year'],
                 code: bookData['attributes']['code'],
-                //description: bookData['attributes']['description'],
                 numberCopies: bookData['attributes']['number_copies'],
                 status: bookData['attributes']['status']))
             .toList();
-        // ignore: avoid_print
         print('este es el token::P:::::::  2222');
         setState(() {
           books = retobook;
           filteredBooks = List.from(books);
         });
       } else {
-        // ignore: avoid_print
         print('dio un error ');
-        // ignore: avoid_print, prefer_interpolation_to_compose_strings
-        print(response.statusCode + books.length);
+        print(response.statusCode);
       }
     });
   }
@@ -113,7 +132,7 @@ class _autorScreenState extends State<autorScreen> {
     String titleToSearch = searchController.text.toLowerCase();
     setState(() {
       filteredBooks = books.where((book) {
-        return book.author.toLowerCase().contains(titleToSearch);
+        return book.title.toLowerCase().contains(titleToSearch);
       }).toList();
       showBooks = true;
     });
@@ -127,19 +146,18 @@ class _autorScreenState extends State<autorScreen> {
         backgroundColor: const Color.fromRGBO(65, 150, 125, 1),
         title: const Text(
           "BIBLIOTECA ISER",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: 30),
         ),
         bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(0),
+          preferredSize: Size.fromHeight(10),
           child: Text(
             "Oscar Mogollón Jaimes",
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
-        // ignore: avoid_unnecessary_containers
         child: Container(
           width: 800,
           decoration: BoxDecoration(
@@ -171,12 +189,9 @@ class _autorScreenState extends State<autorScreen> {
                     ],
                   ),
                 ),
-
                 const SizedBox(
                   height: 20,
                 ),
-
-                // ignore: avoid_unnecessary_containers
                 Container(
                   width: 600,
                   height: 50,
@@ -204,9 +219,16 @@ class _autorScreenState extends State<autorScreen> {
                   height: 20,
                 ),
                 Visibility(
-                  visible:
-                      showBooks, // Si showBooks es true, se mostrará; de lo contrario, se ocultará
-                  child: libros(filteredBooks: filteredBooks),
+                  visible: showBooks,
+                  child: libros(
+                    filteredBooks: filteredBooks,
+                    token: widget.token,
+                    onReserve: () {
+                      setState(() {
+                        // Actualizar la interfaz de usuario
+                      });
+                    },
+                  ),
                 )
               ],
             ),
@@ -220,11 +242,15 @@ class _autorScreenState extends State<autorScreen> {
 // ignore: camel_case_types
 class libros extends StatelessWidget {
   const libros({
-    super.key,
+    Key? key,
     required this.filteredBooks,
-  });
+    required this.token,
+    required this.onReserve,
+  }) : super(key: key);
 
   final List<Book> filteredBooks;
+  final String token;
+  final VoidCallback onReserve;
 
   @override
   Widget build(BuildContext context) {
@@ -243,29 +269,67 @@ class libros extends StatelessWidget {
             bool isButtonEnabled = false;
 
             if (book.status == "disponible") {
-              buttonColor = Colors.green; // Botón verde cuando está disponible
-              isButtonEnabled =
-                  true; // El botón está habilitado cuando está disponible
+              buttonColor = Colors.green;
+              isButtonEnabled = true;
             }
-            return ListTile(
-              selectedTileColor: Colors.amber,
-              // ignore: prefer_interpolation_to_compose_strings
-              title: Text('Titulo:\n${book.title}'),
-              subtitle: Text('Autor:\n${book.author}'),
-              trailing: ElevatedButton(
-                onPressed: isButtonEnabled
-                    ? () {
-                        // Manejar la acción del botón aquí
-                        // ignore: avoid_print
-                        print('Status: ${book.status}');
-                      }
-                    : null, // Deshabilitar el botón cuando no está disponible
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: buttonColor, // Color del botón
-                ),
-                child: Text(
-                  book.status,
-                  style: const TextStyle(color: Colors.black),
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8.0),
+              child: ListTile(
+                selectedTileColor: Colors.amber,
+                title: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: Colors.grey,
+                  ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Titulo: ${book.title}',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 14.0),
+                            ),
+                            Text(
+                              'Autor: ${book.author}',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 14.0),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8.0),
+                      ElevatedButton(
+                        onPressed: isButtonEnabled
+                            ? () async {
+                                try {
+                                  await book.reserveBook(token, book.id);
+                                  onReserve.call();
+                                } catch (e) {
+                                  print('Error al reservar el libro: $e');
+                                }
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          // ignore: deprecated_member_use
+                          primary: buttonColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                        child: Text(
+                          book.status,
+                          style: const TextStyle(
+                              color: Colors.black, fontSize: 14.0),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

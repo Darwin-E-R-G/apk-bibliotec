@@ -212,26 +212,28 @@ class _categoriaScreen extends State<categoriaScreenScreen> {
                     borderRadius: BorderRadius.circular(10.0),
                     color: Colors.white,
                   ),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: DropdownButton<String>(
-                          value: selectedSubcategory,
-                          onChanged: filterBySubcategory,
-                          items: <String>[
-                            'Subcategoría1',
-                            'Subcategoría2',
-                            'Subcategoría3',
-                            // ... (agrega más subcategorías según sea necesario)
-                          ].map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
+                  child: Center(
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: DropdownButton<String>(
+                            value: selectedSubcategory,
+                            onChanged: filterBySubcategory,
+                            items: <String>[
+                              'Subcategoría 1',
+                              'Subcategoría2',
+                              'Subcategoría3',
+                              // ... (agrega más subcategorías según sea necesario)
+                            ].map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(

@@ -8,7 +8,8 @@ import 'categoria.dart';
 // ignore: camel_case_types
 class inicioScreen extends StatefulWidget {
   final String token;
-  const inicioScreen({super.key, required this.token});
+  final int iduser;
+  const inicioScreen({super.key, required this.token, required this.iduser});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -159,8 +160,10 @@ class _inicioScreen extends State<inicioScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    tituloScreen(token: widget.token),
+                                builder: (context) => tituloScreen(
+                                  token: widget.token,
+                                  iduser: widget.iduser,
+                                ),
                               ));
                         },
                         child: Container(

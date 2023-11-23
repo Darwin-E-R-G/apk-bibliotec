@@ -36,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       String documentId = _documentIdController.text;
       String password = _passwordController.text;
 
-      String url = '192.168.101.72:1337/api/auth/local/register';
+      String url = 'http://localhost:1337/api/auth/local/register';
 
       Map<String, dynamic> data = {
         "username": username,
