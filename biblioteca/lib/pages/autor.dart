@@ -2,74 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-class Book {
-  final int id;
-  final String title;
-  final String author;
-  final String editorial;
-  final int publishedYear;
-  final String code;
-  final int numberCopies;
-  String status;
-  Book({
-    required this.id,
-    required this.title,
-    required this.author,
-    required this.editorial,
-    required this.publishedYear,
-    required this.code,
-    required this.numberCopies,
-    required this.status,
-  });
-
-  factory Book.fromJson(Map<String, dynamic> json) {
-    return Book(
-        id: json['id'],
-        title: json['attributes']['title'],
-        author: json['attributes']['author'],
-        editorial: json['attributes']['editorial'],
-        publishedYear: json['attributes']['published_year'],
-        code: json['attributes']['code'],
-        numberCopies: json['attributes']['number_copies'],
-        status: json['attributes']['status']);
-  }
-
-  Future<void> reserveBook(String token, int id) async {
-    if (status == "disponible") {
-      status = "reservado";
-
-      // Actualizar el estado en el servidor Strapi
-      print(id);
-      final String apiUrl = 'http://localhost:1337/api/books/$id';
-      final response = await http.put(
-        Uri.parse(apiUrl),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'data': {
-            'attributes': {'status': 'reservado'},
-          },
-        }),
-      );
-      print(response.statusCode);
-      if (response.statusCode != 200) {
-        // Manejar el error al actualizar el estado en el servidor
-        print(
-            'Error en la solicitud PUT. Código de estado: ${response.statusCode}');
-        print('Cuerpo de la respuesta: ${response.body}');
-        throw Exception('Failed to reserve book');
-      }
-    }
-  }
-}
+import 'clasebook.dart';
 
 // ignore: camel_case_types
 class autorScreen extends StatefulWidget {
   final String token;
-  const autorScreen({Key? key, required this.token}) : super(key: key);
+  final int iduser;
+  const autorScreen({Key? key, required this.token, required this.iduser})
+      : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -223,6 +163,7 @@ class _autorScreenState extends State<autorScreen> {
                   child: libros(
                     filteredBooks: filteredBooks,
                     token: widget.token,
+                    iduser: widget.iduser,
                     onReserve: () {
                       setState(() {
                         // Actualizar la interfaz de usuario
@@ -246,11 +187,13 @@ class libros extends StatelessWidget {
     required this.filteredBooks,
     required this.token,
     required this.onReserve,
+    required this.iduser,
   }) : super(key: key);
 
   final List<Book> filteredBooks;
   final String token;
   final VoidCallback onReserve;
+  final int iduser;
 
   @override
   Widget build(BuildContext context) {
@@ -308,7 +251,8 @@ class libros extends StatelessWidget {
                         onPressed: isButtonEnabled
                             ? () async {
                                 try {
-                                  await book.reserveBook(token, book.id);
+                                  await book.reserveBook(
+                                      token, book.id, iduser);
                                   onReserve.call();
                                 } catch (e) {
                                   print('Error al reservar el libro: $e');

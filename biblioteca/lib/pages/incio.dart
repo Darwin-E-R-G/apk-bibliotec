@@ -123,8 +123,10 @@ class _inicioScreen extends State<inicioScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    autorScreen(token: widget.token),
+                                builder: (context) => autorScreen(
+                                  token: widget.token,
+                                  iduser: widget.iduser,
+                                ),
                               ));
                         },
                         child: Container(

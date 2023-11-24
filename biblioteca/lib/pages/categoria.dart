@@ -3,44 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class Book {
-  final int id;
-  final String title;
-  final String author;
-  final String editorial;
-  final int publishedYear;
-  final String code;
-  // final String description;
-  final int numberCopies;
-  final String status;
-  final String subcategory;
-
-  Book(
-      {required this.id,
-      required this.title,
-      required this.author,
-      required this.editorial,
-      required this.publishedYear,
-      required this.code,
-      //required this.description,
-      required this.numberCopies,
-      required this.status,
-      this.subcategory = ''});
-
-  factory Book.fromJson(Map<String, dynamic> json) {
-    return Book(
-        id: json['id'],
-        title: json['attributes']['title'],
-        author: json['attributes']['author'],
-        editorial: json['attributes']['editorial'],
-        publishedYear: json['attributes']['published_year'],
-        code: json['attributes']['code'],
-        //description: json['attributes']['description'],
-        numberCopies: json['attributes']['number_copies'],
-        status: json['attributes']['status'],
-        subcategory: json['attributes']['Subcategory'] ?? '');
-  }
-}
+import 'clasebook.dart';
 
 // ignore: must_be_immutable, camel_case_types
 class categoriaScreenScreen extends StatefulWidget {
@@ -54,7 +17,7 @@ class categoriaScreenScreen extends StatefulWidget {
 
 // ignore: camel_case_types
 class _categoriaScreen extends State<categoriaScreenScreen> {
-  final String apiUrl = 'http://localhost:1337/api/books';
+  final String apiUrl = 'http://localhost:1337/api/books?_expand=subcategories';
   TextEditingController searchController = TextEditingController();
   String titleToSearch = 'Libro de ejemplo 1'; // Cambia el título a buscar
 
@@ -220,9 +183,26 @@ class _categoriaScreen extends State<categoriaScreenScreen> {
                             value: selectedSubcategory,
                             onChanged: filterBySubcategory,
                             items: <String>[
-                              'Subcategoría 1',
-                              'Subcategoría2',
-                              'Subcategoría3',
+                              'Gestión Empresarial.',
+                              'Redes y sistemas teleinformáticos.',
+                              'Investigación.',
+                              'Obras civiles.',
+                              'Salud y seguridad.',
+                              'Industrial.',
+                              'Gestión comunitaria.',
+                              'Agroindustria.',
+                              'Matemáticas y afines.',
+                              'Química.',
+                              'Biología.',
+                              'Filosofía y legislación.',
+                              'Agrícola.',
+                              'Agropecuaria.',
+                              'Hemeroteca.',
+                              'Educación.',
+                              'Diccionarios y enciclopedias.',
+                              'Obras literarias.',
+                              'Trabajos de grado.',
+
                               // ... (agrega más subcategorías según sea necesario)
                             ].map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(

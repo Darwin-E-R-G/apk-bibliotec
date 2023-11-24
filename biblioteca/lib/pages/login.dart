@@ -47,17 +47,10 @@ class _LoginScreenState extends State<LoginScreen> {
       print(response.statusCode);
       if (response.statusCode == 200) {
         // Inicio de sesión exitoso
-        print('Inicio de sesión exitoso');
         String responseBody = response.body;
-        print(responseBody);
         Map<String, dynamic> jsonResponse = json.decode(responseBody);
         String jwtToken = jsonResponse['jwt'];
         int userId = jsonResponse['user']['id'];
-        // ignore: prefer_interpolation_to_compose_strings
-        print('este es el toker=rn ' + jwtToken);
-        // ignore: prefer_interpolation_to_compose_strings
-        print('este es el id ');
-        print(userId);
         // ignore: use_build_context_synchronously
         Navigator.push(
           context,
