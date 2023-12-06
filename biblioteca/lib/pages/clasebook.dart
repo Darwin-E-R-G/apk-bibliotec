@@ -13,7 +13,8 @@ class Book {
   // final String description;
   final int numberCopies;
   String status;
-  final String subcategory;
+  final String category;
+  final String description;
 
   Book(
       {required this.id,
@@ -25,7 +26,8 @@ class Book {
       //required this.description,
       required this.numberCopies,
       required this.status,
-      this.subcategory = ''});
+      required this.category,
+      this.description = ''});
 
   factory Book.fromJson(Map<String, dynamic> json) {
     return Book(
@@ -35,10 +37,10 @@ class Book {
         editorial: json['attributes']['editorial'],
         publishedYear: json['attributes']['published_year'],
         code: json['attributes']['code'],
-        //description: json['attributes']['description'],
+        description: json['attributes']['description'] ?? '',
         numberCopies: json['attributes']['number_copies'],
         status: json['attributes']['status'],
-        subcategory: json['attributes']['Subcategory'] ?? '');
+        category: json['attributes']['category']);
   }
 
   Future<void> reserveBook(String token, int id, int iduser) async {

@@ -1,6 +1,5 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, sized_box_for_whitespace, deprecated_member_use
 import 'dart:convert';
-//import 'package:biblioteca/pages/categoria.dart';
 import 'package:biblioteca/pages/incio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -23,17 +22,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
-      // Datos del formulario
       String username = _usernameController.text;
       String password = _passwordController.text;
-      // URL de tu servidor Strapi para el inicio de sesión
       String url = 'http://localhost:1337/api/auth/local';
-      // Datos a enviar
       Map<String, dynamic> data = {
         'identifier': username,
         'password': password,
       };
-
       print(data.toString());
       // Realizar la petición POST
       final response = await http.post(
@@ -46,7 +41,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       print(response.statusCode);
       if (response.statusCode == 200) {
-        // Inicio de sesión exitoso
         String responseBody = response.body;
         Map<String, dynamic> jsonResponse = json.decode(responseBody);
         String jwtToken = jsonResponse['jwt'];
@@ -60,6 +54,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     iduser: userId,
                   )),
         );
+        _usernameController.clear();
+        _passwordController.clear();
       } else {
         // Error en el inicio de sesión
         print('Error en el inicio de sesión');
@@ -74,13 +70,20 @@ class _LoginScreenState extends State<LoginScreen> {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(65, 150, 125, 1),
         title: const Text(
-          "BIBLIOTECA",
+          "BIBLIOTECA ISER",
           style: TextStyle(color: Colors.white),
+        ),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(10),
+          child: Text(
+            "Oscar Mogollón Jaimes",
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
       // ignore: avoid_unnecessary_containers
-      body: Stack(children: [
-        Container(
+      body: Center(
+        child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 50),
           child: SingleChildScrollView(
             child: Column(
@@ -150,18 +153,47 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ]),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: const Color.fromRGBO(65, 150, 125, 1),
+        // ignore: avoid_unnecessary_containers
+        child: Container(
+          child: Center(
+              child: InkWell(
+            onTap: () {
+              BookDetailsDialog.show(context);
+              // Reemplaza OtraVista con el nombre de tu vista
+            },
+            child: const Text(
+              'copyright©',
+              style: TextStyle(
+                fontSize: 15,
+                color: Color.fromRGBO(240, 243, 242, 1), // Color del texto
+                fontWeight: FontWeight.bold, // Texto en negrita
+                fontFamily: AutofillHints.addressCity,
+              ),
+            ),
+          )),
+        ),
+      ),
     );
   }
 
   InkWell olvidoContrasena(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                const RegisterScreen(), // Reemplaza OtraVista con el nombre de tu vista
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+                'Para recuperar tu contraseña, por favor, acude a la biblioteca.'), // Personaliza el mensaje
+            duration: const Duration(seconds: 5),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0), // Bordes redondeados
+            ),
           ),
         );
       },
@@ -279,5 +311,40 @@ class _LoginScreenState extends State<LoginScreen> {
             },
           ),
         ));
+  }
+}
+
+class BookDetailsDialog {
+  static void show(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Desarrollado por:'),
+          content: Container(
+            height: 100,
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Darwin Elpidio Robles Garcia'),
+                Text('Dylan Santiago Bautista'),
+                // Agrega más detalles según sea necesario
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Cerrar',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

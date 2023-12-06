@@ -35,9 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       String documentType = _documentTypeController.text;
       String documentId = _documentIdController.text;
       String password = _passwordController.text;
-
       String url = 'http://localhost:1337/api/auth/local/register';
-
       Map<String, dynamic> data = {
         "username": username,
         "email": email,
@@ -56,7 +54,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
         body: jsonEncode(data),
       );
-
       if (response.statusCode == 200) {
         // Registro exitoso
         // ignore: avoid_print
@@ -86,12 +83,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(65, 150, 125, 1),
         title: const Text(
-          "BIBLIOTECA",
+          "BIBLIOTECA ISER",
           style: TextStyle(color: Colors.white),
         ),
-        toolbarHeight: 80,
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(10),
+          child: Text(
+            "Oscar Mogollón Jaimes",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
       ),
-      body: Padding(
+      body: Center(
+          child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 50),
         child: Form(
           key: _formKey,
@@ -205,6 +209,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ],
             ),
           ),
+        ),
+      )),
+      bottomNavigationBar: BottomAppBar(
+        color: const Color.fromRGBO(65, 150, 125, 1),
+        // ignore: avoid_unnecessary_containers
+        child: Container(
+          child: Center(
+              child: InkWell(
+            onTap: () {
+              BookDetailsDialog.show(context);
+              // Reemplaza OtraVista con el nombre de tu vista
+            },
+            child: const Text(
+              'copyright©',
+              style: TextStyle(
+                fontSize: 15,
+                color: Color.fromRGBO(240, 243, 242, 1), // Color del texto
+                fontWeight: FontWeight.bold, // Texto en negrita
+                fontFamily: AutofillHints.addressCity,
+              ),
+            ),
+          )),
         ),
       ),
     );
